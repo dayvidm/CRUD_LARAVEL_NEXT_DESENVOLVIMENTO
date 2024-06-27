@@ -1,56 +1,41 @@
 version: '3.8'
-
 services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: backend
-    restart: unless-stopped
-    tty: true
-    environment:
-      SERVICE_NAME: backend
-      SERVICE_TAGS: dev
-    working_dir: /var/www
     volumes:
       - ./backend:/var/www
-      - ./backend/php/local.ini:/usr/local/etc/php/conf.d/local.ini
-    networks:
-      - app-network
+      - ./backend/docker/nginx.conf:/etc/nginx/sites-available/default  # Mapeamento do arquivo nginx.conf
+    ports:
+      - "80:80"  # Mapeamento de porta para o Nginx
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=mydatabase
+      - DB_USERNAME=myuser
+      - DB_PASSWORD=mypassword
     depends_on:
       - db
-
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: frontend
-    restart: unless-stopped
-    tty: true
+    volumes:
+      - ./frontend:/var/www
     ports:
       - "3000:3000"
-    networks:
-      - app-network
-    volumes:
-      - ./frontend:/usr/src/app
-
+    depends_on:
+      - backend
   db:
-    image: postgres:13
-    container_name: postgres
-    restart: unless-stopped
+    image: postgres:latest
+    restart: always
     environment:
-      POSTGRES_DB: laravel
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
     volumes:
-      - dbdata:/var/lib/postgresql/data
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
-
+      - postgres_data:/var/lib/postgresql/data
 volumes:
-  dbdata:
-    driver: local
+  postgres_data:

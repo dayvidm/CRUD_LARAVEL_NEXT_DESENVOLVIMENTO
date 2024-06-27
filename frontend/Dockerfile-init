@@ -1,7 +1,0 @@
-FROM node:18-alpine
-
-WORKDIR /app
-
-RUN npx create-next-app@latest . --use-npm
-
-COPY . .
