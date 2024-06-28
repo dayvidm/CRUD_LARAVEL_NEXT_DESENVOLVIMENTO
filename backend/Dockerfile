@@ -1,26 +1,32 @@
-# Use uma imagem base do PHP com FPM
-FROM php:8.1-fpm
+# Use the official PHP image as a base image
+FROM php:8.2-fpm
 
-# Instalação de dependências do sistema e do servidor web Nginx
+# Set working directory
+WORKDIR /var/www/html
+
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    nginx \
-    supervisor \
-    # Outras dependências necessárias
-# Diretório de trabalho dentro do contêiner
-WORKDIR /var/www
+    git \
+    unzip \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    libxml2-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo_mysql zip exif pcntl bcmath opcache
 
-# Instalação do Composer e outras dependências do PHP
+# Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN docker-php-ext-install pdo pdo_mysql mysqli zip
 
-# Configurações adicionais do Nginx
-COPY ./docker/nginx.conf /etc/nginx/sites-available/default
+# Copy existing application directory contents to the container working directory
+COPY . /var/www/html
 
-# Copiar arquivos do Laravel para o contêiner
-COPY . .
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage
 
-# Expor porta para o servidor web Nginx
-EXPOSE 80
-
-# Comando para iniciar o servidor web e o PHP-FPM
-CMD service nginx start && php-fpm
+# Expose port 9000 and start php-fpm server
+EXPOSE 9000
+CMD ["php-fpm"]

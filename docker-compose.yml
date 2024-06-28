@@ -1,41 +1,41 @@
-version: '3.8'
+version: '3.9'
+
 services:
-  backend:
+  php:
     build:
-      context: ./backend
+      context: ./backend/docker/php
       dockerfile: Dockerfile
+    ports:
+      - 9000:9000
     volumes:
       - ./backend:/var/www
-      - ./backend/docker/nginx.conf:/etc/nginx/sites-available/default  # Mapeamento do arquivo nginx.conf
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx
     ports:
-      - "80:80"  # Mapeamento de porta para o Nginx
-    environment:
-      - DB_CONNECTION=pgsql
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_DATABASE=mydatabase
-      - DB_USERNAME=myuser
-      - DB_PASSWORD=mypassword
+      - 80:80
+    volumes:
+      - ./backend:/var/www
+      - ./backend/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./backend/docker/nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - db
+      - php
+    networks:
+      - app-network
+
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    volumes:
-      - ./frontend:/var/www
     ports:
       - "3000:3000"
-    depends_on:
-      - backend
-  db:
-    image: postgres:latest
-    restart: always
-    environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-volumes:
-  postgres_data:
+      - ./frontend:/usr/src/app
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
