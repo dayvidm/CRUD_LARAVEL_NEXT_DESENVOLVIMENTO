@@ -1,3 +1,7 @@
+# no Windows
 - Na pasta raiz, rode o arquivo start.bat para iniciar o projeto.
 - Na primeira vez, rode o comando : 
     - docker compose exec application chown -R www-data:www-data /var/www/storage
+# no linux e mac  
+    - chmod +x start.sh
+    - ./start.sh
