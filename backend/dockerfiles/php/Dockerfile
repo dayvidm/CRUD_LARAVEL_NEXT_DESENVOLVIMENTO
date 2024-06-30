@@ -8,17 +8,17 @@ RUN apk add --no-cache \
     curl \
     libpng-dev \
     libzip-dev \
-    zlib-dev
+    zlib-dev \
+    postgresql-dev
 
 # Install PHP extensions
 RUN docker-php-ext-install gd \
-    && docker-php-ext-install zip
+    && docker-php-ext-install zip \
+    && docker-php-ext-install pdo_pgsql
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install node and npm
-RUN apk add --no-cache nodejs npm
 
 # Copy application files
 COPY . /var/www
@@ -34,7 +34,5 @@ RUN chown -R www-data:www-data /var/www/storage \
     && chmod -R 775 /var/www/storage \
     && chmod -R 775 /var/www/bootstrap/cache
 
-# Install npm dependencies
-RUN npm install
 
 EXPOSE 9000

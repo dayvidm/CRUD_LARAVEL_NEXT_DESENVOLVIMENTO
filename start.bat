@@ -3,12 +3,6 @@ echo Subindo o frontend...
 cd frontend
 start cmd /c "npm run dev" || start cmd /c "yarn dev"
 cd ..
-cd backend
-
-echo Subindo os servicos do Docker Compose...
-docker-compose up -d
-
-cd ..
 
 set CONTAINER_NAME=postgres_container
 
@@ -21,6 +15,14 @@ if %errorlevel%==0 (
     echo O contêiner %CONTAINER_NAME% não existe. Criando e iniciando o contêiner...
     docker run --name %CONTAINER_NAME% -p 5432:5432 -v /tmp/database:/var/lib/postgresql/data -e POSTGRES_PASSWORD=1234 -d postgres
 )
+
+cd backend
+
+docker-compose up -d
+
+cd ..
+
+
 
 echo Tudo pronto!
 pause

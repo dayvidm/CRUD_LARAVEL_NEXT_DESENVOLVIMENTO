@@ -5,3 +5,7 @@
 # no linux e mac  
     - chmod +x start.sh
     - ./start.sh
+
+
+-------------
+- Necessário rodar o php artisan migrate para criar as tabelas no banco de dados
